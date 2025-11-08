@@ -151,15 +151,17 @@ public final class SplitUtil {
 				continue;
 			}
 			if (!BlockConnectivityApi.isAir(newState)) {
-				final PartHolder p = new PartHolder(new Part(startBlock));
-				parts.add(p);
-				visited.put(startBlock, p);
+				if (!visited.containsKey(startBlock)) {
+					final PartHolder p = new PartHolder(new Part(startBlock));
+					parts.add(p);
+					visited.put(startBlock, p);
+				}
 				BlockConnectivityApi.getPossibleConnectableBlocks(level, startBlock, newState, nextPosSet);
 			}
 			if (prevState.connections().isEmpty()) {
+				// New block placed, check if it can connect to the ship.
 				for (final BlockPos conn : nextPosSet) {
 					if (
-						!updates.containsKey(conn) &&
 						!visited.containsKey(conn) &&
 						!BlockConnectivityApi.isAir(level.getBlockState(conn))
 					) {
@@ -172,7 +174,6 @@ public final class SplitUtil {
 				for (final BlockPos conn : prevState.connections()) {
 					if (
 						!nextPosSet.contains(conn) &&
-						!updates.containsKey(conn) &&
 						!visited.containsKey(conn) &&
 						!BlockConnectivityApi.isAir(level.getBlockState(conn))
 					) {
