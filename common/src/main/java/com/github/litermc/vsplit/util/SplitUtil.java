@@ -4,6 +4,7 @@ import com.github.litermc.vsplit.accessor.ShipObjectServerAccessor;
 import com.github.litermc.vsplit.api.attachment.ISplitListener;
 import com.github.litermc.vtil.api.assemble.AssembleApi;
 import com.github.litermc.vtil.api.connectivity.BlockConnectivityApi;
+import com.github.litermc.vtil.config.Config;
 import com.github.litermc.vtil.util.LevelUtil;
 
 import net.minecraft.core.BlockPos;
@@ -41,6 +42,9 @@ public final class SplitUtil {
 	 * module-private
 	 */
 	public static void onBlockUpdated(final ServerLevel level, final BlockPos pos, final BlockState oldState, final BlockState newState) {
+		if (!Config.enableShipSplit) {
+			return;
+		}
 		final LoadedServerShip ship = VSGameUtilsKt.getShipObjectManagingPos(level, pos);
 		if (ship == null) {
 			return;
