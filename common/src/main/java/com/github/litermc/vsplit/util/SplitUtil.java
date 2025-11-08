@@ -2,9 +2,9 @@ package com.github.litermc.vsplit.util;
 
 import com.github.litermc.vsplit.accessor.ShipObjectServerAccessor;
 import com.github.litermc.vsplit.api.attachment.ISplitListener;
+import com.github.litermc.vsplit.config.Config;
 import com.github.litermc.vtil.api.assemble.AssembleApi;
 import com.github.litermc.vtil.api.connectivity.BlockConnectivityApi;
-import com.github.litermc.vtil.config.Config;
 import com.github.litermc.vtil.util.LevelUtil;
 
 import net.minecraft.core.BlockPos;
