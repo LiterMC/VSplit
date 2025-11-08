@@ -7,7 +7,7 @@ import java.nio.file.Path;
 public final class ConfigSpec {
 	public static final ConfigFile serverSpec;
 
-	// public static final ConfigFile.Value<Boolean> FORCE_LOAD_ALL_SHIPS;
+	public static final ConfigFile.Value<Boolean> ENABLE_SHIP_SPLIT;
 
 	private ConfigSpec() {}
 
@@ -18,9 +18,9 @@ public final class ConfigSpec {
 				.comment("General settings")
 				.push("general");
 
-			FORCE_LOAD_ALL_SHIPS = builder
+			ENABLE_SHIP_SPLIT = builder
 				.comment("Should try split ship when block changed")
-				.define("enable_ship_split", Config.forceLoadAllShips);
+				.define("enable_ship_split", Config.enableShipSplit);
 
 			builder.pop();
 		}
@@ -29,7 +29,7 @@ public final class ConfigSpec {
 	}
 
 	public static void syncServer(Path path) {
-		// Config.forceLoadAllShips = FORCE_LOAD_ALL_SHIPS.get();
+		Config.enableShipSplit = ENABLE_SHIP_SPLIT.get();
 	}
 
 	public static void syncClient(Path path) {

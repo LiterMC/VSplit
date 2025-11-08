@@ -1,5 +1,6 @@
 package com.github.litermc.vsplit;
 
+import com.github.litermc.vsplit.util.SplitUtil;
 import com.github.litermc.vsplit.util.TaskUtil;
 
 import net.minecraft.server.MinecraftServer;
@@ -23,6 +24,7 @@ public final class VSplitListeners {
 	}
 
 	public static void postServerTick(final MinecraftServer server) {
+		SplitUtil.postServerTick();
 		TaskUtil.postServerTick();
 	}
 }

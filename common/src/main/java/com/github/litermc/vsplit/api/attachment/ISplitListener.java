@@ -1,4 +1,4 @@
-package com.github.litermc.lbvs.api.attachment;
+package com.github.litermc.vsplit.api.attachment;
 
 import net.minecraft.core.BlockPos;
 
@@ -14,7 +14,7 @@ public interface ISplitListener {
 	/**
 	 * onShipSplit is invoked before each part of a ship is going to split out.
 	 *
-	 * @param context The ship split context.
+	 * @param context The ship split context. Should only be used inside the method's lifecycle.
 	 */
 	void onShipSplit(Context context);
 
@@ -34,11 +34,11 @@ public interface ISplitListener {
 		Set<BlockPos> getBlocks();
 
 		/**
-		 * Set the callback to be invoked after ship splitting.
+		 * Add a callback to be invoked after ship splitting.
 		 * The callback will be provided with the instance of splitted ship.
 		 *
 		 * @param callback The after split callback.
 		 */
-		void setAfterSplit(Consumer<ServerShip> callback);
+		void addAfterSplit(Consumer<ServerShip> callback);
 	}
 }

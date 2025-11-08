@@ -1,7 +1,10 @@
-package com.github.litermc.vsmecha.util.split;
+package com.github.litermc.vsplit.util;
 
-import com.github.litermc.vsmecha.util.LevelUtil;
-import com.github.litermc.vsmecha.util.assemble.AssembleUtil;
+import com.github.litermc.vsplit.accessor.ShipObjectServerAccessor;
+import com.github.litermc.vsplit.api.attachment.ISplitListener;
+import com.github.litermc.vtil.api.assemble.AssembleApi;
+import com.github.litermc.vtil.api.connectivity.BlockConnectivityApi;
+import com.github.litermc.vtil.util.LevelUtil;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
@@ -12,18 +15,21 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FluidState;
 
 import org.valkyrienskies.core.api.ships.LoadedServerShip;
+import org.valkyrienskies.core.api.ships.ServerShip;
 import org.valkyrienskies.core.api.ships.Ship;
 import org.valkyrienskies.mod.common.VSGameUtilsKt;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
+import java.util.function.Consumer;
 
 public final class SplitUtil {
 	private SplitUtil() {}
@@ -43,7 +49,7 @@ public final class SplitUtil {
 		if (updates.containsKey(pos)) {
 			return;
 		}
-		if (isAir(oldState)) {
+		if (BlockConnectivityApi.isAir(oldState)) {
 			updates.put(pos, new OldStateHolder(oldState, List.of()));
 		} else {
 			final List<BlockPos> prevConns = new ArrayList<>(6);
@@ -56,8 +62,16 @@ public final class SplitUtil {
 	 * module-private
 	 */
 	public static void postServerTick() {
-		for (final Map.Entry<LoadedServerShip, Map<BlockPos, OldStateHolder>> entry : UPDATING_SHIP.entrySet()) {
+		if (UPDATING_SHIP.isEmpty()) {
+			return;
+		}
+		final Map<LoadedServerShip, Map<BlockPos, OldStateHolder>> updating = Map.copyOf(UPDATING_SHIP);
+		UPDATING_SHIP.clear();
+		final List<ISplitListener> listeners = new ArrayList<>(0);
+		final List<Consumer<ServerShip>> callbacks = new ArrayList<>(0);
+		for (final Map.Entry<LoadedServerShip, Map<BlockPos, OldStateHolder>> entry : updating.entrySet()) {
 			final LoadedServerShip ship = entry.getKey();
+			final ShipObjectServerAccessor slGetter = ship instanceof final ShipObjectServerAccessor slGetter0 ? slGetter0 : null;
 			final Map<BlockPos, OldStateHolder> updates = entry.getValue();
 			final ServerLevel level = LevelUtil.getLevel(ship.getChunkClaimDimension());
 			final List<Set<BlockPos>> parts = getSeparatedParts(level, ship, updates);
@@ -66,10 +80,27 @@ public final class SplitUtil {
 			}
 			final String slug = extractBaseSlug(ship.getSlug());
 			for (final Set<BlockPos> part : parts) {
-				AssembleApi.createShip(level, addPartSlug(slug), part, ship);
+				if (slGetter != null) {
+					final SplitContext context = new SplitContext(ship, Collections.unmodifiableSet(part), callbacks);
+					listeners.addAll(slGetter.vsplit$getSplitListeners());
+					for (final ISplitListener listener : listeners) {
+						listener.onShipSplit(context);
+					}
+					listeners.clear();
+				}
+				final ServerShip splittedShip = AssembleApi.createShip(level, part, ship);
+				if (splittedShip == null) {
+					continue;
+				}
+				splittedShip.setSlug(addPartSlug(slug));
+				if (slGetter != null) {
+					for (final Consumer<ServerShip> callback : callbacks) {
+						callback.accept(splittedShip);
+					}
+					callbacks.clear();
+				}
 			}
 		}
-		UPDATING_SHIP.clear();
 	}
 
 	private static String extractBaseSlug(final String slug) {
@@ -112,20 +143,39 @@ public final class SplitUtil {
 			final BlockPos startBlock = update.getKey();
 			final OldStateHolder prevState = update.getValue();
 			final BlockState newState = level.getBlockState(startBlock);
-			if (!willConnectivityChange(level, startBlock, prevState.state(), newState)) {
+			if (!BlockConnectivityApi.willConnectivityChange(level, startBlock, prevState.state(), newState)) {
 				continue;
 			}
-			if (!isAir(newState)) {
+			if (!BlockConnectivityApi.isAir(newState)) {
 				final PartHolder p = new PartHolder(new Part(startBlock));
 				parts.add(p);
 				visited.put(startBlock, p);
 				BlockConnectivityApi.getPossibleConnectableBlocks(level, startBlock, newState, nextPosSet);
 			}
-			for (final BlockPos conn : prevState.connections()) {
-				if (!nextPosSet.contains(conn) && !updates.containsKey(conn) && !visited.containsKey(conn) && !isAir(level, conn)) {
-					final PartHolder p = new PartHolder(new Part(conn));
-					parts.add(p);
-					visited.put(conn, p);
+			if (prevState.connections().isEmpty()) {
+				for (final BlockPos conn : nextPosSet) {
+					if (
+						!updates.containsKey(conn) &&
+						!visited.containsKey(conn) &&
+						!BlockConnectivityApi.isAir(level.getBlockState(conn))
+					) {
+						final PartHolder p = new PartHolder(new Part(conn));
+						parts.add(p);
+						visited.put(conn, p);
+					}
+				}
+			} else {
+				for (final BlockPos conn : prevState.connections()) {
+					if (
+						!nextPosSet.contains(conn) &&
+						!updates.containsKey(conn) &&
+						!visited.containsKey(conn) &&
+						!BlockConnectivityApi.isAir(level.getBlockState(conn))
+					) {
+						final PartHolder p = new PartHolder(new Part(conn));
+						parts.add(p);
+						visited.put(conn, p);
+					}
 				}
 			}
 			nextPosSet.clear();
@@ -252,6 +302,36 @@ public final class SplitUtil {
 			if (this.blocks.add(pos)) {
 				this.pending.add(pos);
 			}
+		}
+	}
+
+	private static final class SplitContext implements ISplitListener.Context {
+		private final ServerShip ship;
+		private final Set<BlockPos> blocks;
+		private final List<Consumer<ServerShip>> callbacks;
+
+		private SplitContext(final ServerShip ship, final Set<BlockPos> blocks, final List<Consumer<ServerShip>> callbacks) {
+			this.ship = ship;
+			this.blocks = blocks;
+			this.callbacks = callbacks;
+		}
+
+		@Override
+		public ServerShip getShip() {
+			return this.ship;
+		}
+
+		@Override
+		public Set<BlockPos> getBlocks() {
+			return this.blocks;
+		}
+
+		@Override
+		public void addAfterSplit(final Consumer<ServerShip> callback) {
+			if (callback == null) {
+				throw new IllegalArgumentException("callback cannot be null");
+			}
+			this.callbacks.add(callback);
 		}
 	}
 }

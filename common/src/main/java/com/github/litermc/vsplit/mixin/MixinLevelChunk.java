@@ -1,6 +1,6 @@
 package com.github.litermc.vsplit.mixin;
 
-import com.github.litermc.vsplit.util.split.SplitUtil;
+import com.github.litermc.vsplit.util.SplitUtil;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
