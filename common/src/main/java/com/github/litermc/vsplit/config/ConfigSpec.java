@@ -8,6 +8,7 @@ public final class ConfigSpec {
 	public static final ConfigFile serverSpec;
 
 	public static final ConfigFile.Value<Boolean> ENABLE_SHIP_SPLIT;
+	public static final ConfigFile.Value<Boolean> ASYNC_SHIP_SPLIT;
 
 	private ConfigSpec() {}
 
@@ -19,8 +20,12 @@ public final class ConfigSpec {
 				.push("general");
 
 			ENABLE_SHIP_SPLIT = builder
-				.comment("Should try split ship when block changed")
+				.comment("Should try split ship when block changed.")
 				.define("enable_ship_split", Config.enableShipSplit);
+
+			ASYNC_SHIP_SPLIT = builder
+				.comment("Use async ship assembly, this will improve split performance but can also cause some unknown issues.")
+				.define("async_ship_split", Config.asyncShipSplit);
 
 			builder.pop();
 		}
@@ -30,6 +35,7 @@ public final class ConfigSpec {
 
 	public static void syncServer(Path path) {
 		Config.enableShipSplit = ENABLE_SHIP_SPLIT.get();
+		Config.asyncShipSplit = ASYNC_SHIP_SPLIT.get();
 	}
 
 	public static void syncClient(Path path) {

@@ -15,6 +15,7 @@ import net.minecraft.world.level.block.LiquidBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FluidState;
 
+import org.joml.primitives.AABBic;
 import org.valkyrienskies.core.api.ships.LoadedServerShip;
 import org.valkyrienskies.core.api.ships.ServerShip;
 import org.valkyrienskies.core.api.ships.Ship;
@@ -35,6 +36,7 @@ import java.util.function.Consumer;
 public final class SplitUtil {
 	private SplitUtil() {}
 
+	private static final int ASYNC_SHIP_SPLIT_TIMEOUT = 20;
 	private static final Map<LoadedServerShip, Map<BlockPos, OldStateHolder>> UPDATING_SHIP = new HashMap<>();
 	private static int PART_COUNTER = 0;
 
@@ -72,9 +74,12 @@ public final class SplitUtil {
 		final Map<LoadedServerShip, Map<BlockPos, OldStateHolder>> updating = Map.copyOf(UPDATING_SHIP);
 		UPDATING_SHIP.clear();
 		final List<ISplitListener> listeners = new ArrayList<>(0);
-		final List<Consumer<ServerShip>> callbacks = new ArrayList<>(0);
 		for (final Map.Entry<LoadedServerShip, Map<BlockPos, OldStateHolder>> entry : updating.entrySet()) {
 			final LoadedServerShip ship = entry.getKey();
+			final AABBic shipArea = ship.getShipAABB();
+			if (shipArea == null || (shipArea.minX() == shipArea.maxX() && shipArea.minY() == shipArea.maxY() && shipArea.minZ() == shipArea.maxZ())) {
+				continue;
+			}
 			final ShipObjectServerAccessor slGetter = ship instanceof final ShipObjectServerAccessor slGetter0 ? slGetter0 : null;
 			final Map<BlockPos, OldStateHolder> updates = entry.getValue();
 			final ServerLevel level = LevelUtil.getLevel(ship.getChunkClaimDimension());
@@ -84,24 +89,43 @@ public final class SplitUtil {
 			}
 			final String slug = extractBaseSlug(ship.getSlug());
 			for (final Set<BlockPos> part : parts) {
-				if (slGetter != null) {
-					final SplitContext context = new SplitContext(ship, Collections.unmodifiableSet(part), callbacks);
+				final List<Consumer<ServerShip>> callbacks;
+				if (slGetter == null) {
+					callbacks = null;
+				} else {
 					listeners.addAll(slGetter.vsplit$getSplitListeners());
+					callbacks = new ArrayList<>(listeners.size());
+					final SplitContext context = new SplitContext(ship, Collections.unmodifiableSet(part), callbacks);
 					for (final ISplitListener listener : listeners) {
 						listener.onShipSplit(context);
 					}
 					listeners.clear();
 				}
-				final ServerShip splittedShip = AssembleApi.createShip(level, part, ship);
+				if (Config.asyncShipSplit) {
+					AssembleApi.createShipAsync(level, part, ASYNC_SHIP_SPLIT_TIMEOUT).thenAccept((splittedShip) -> {
+						if (splittedShip == null) {
+							return;
+						}
+						splittedShip.setSlug(addPartSlug(slug));
+						if (callbacks == null) {
+							return;
+						}
+						for (final Consumer<ServerShip> callback : callbacks) {
+							callback.accept(splittedShip);
+						}
+					});
+					continue;
+				}
+				final ServerShip splittedShip = AssembleApi.createShip(level, part);
 				if (splittedShip == null) {
 					continue;
 				}
 				splittedShip.setSlug(addPartSlug(slug));
-				if (slGetter != null) {
-					for (final Consumer<ServerShip> callback : callbacks) {
-						callback.accept(splittedShip);
-					}
-					callbacks.clear();
+				if (callbacks == null) {
+					continue;
+				}
+				for (final Consumer<ServerShip> callback : callbacks) {
+					callback.accept(splittedShip);
 				}
 			}
 		}
@@ -202,17 +226,19 @@ public final class SplitUtil {
 				if (!parts.contains(holder)) {
 					continue;
 				}
-				final Part part = holder.getForward().part;
+				final PartHolder holder1 = holder.getForward();
+				final Part part = holder1.part;
 				if (part.complete) {
-					// TODO: why will this happen?
-					parts.remove(holder);
-					continue;
+					// // TODO: why will this happen?
+					// parts.remove(holder);
+					throw new RuntimeException("unreachable");
+					// continue;
 				}
 				final BlockPos pos = part.poll();
 				if (pos == null) {
 					part.complete = true;
 					scannedParts.add(part.blocks);
-					parts.remove(part);
+					parts.removeIf((h) -> h.getForward() == holder1);
 					continue;
 				}
 				polled++;
