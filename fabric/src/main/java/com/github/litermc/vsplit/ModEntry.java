@@ -27,6 +27,8 @@ public class ModEntry implements ModInitializer {
 				.load(server.getWorldPath(LevelResource.ROOT).resolve(SERVERCONFIG).resolve(Constants.MOD_ID + "-server.toml"));
 		});
 
+		ServerLifecycleEvents.SERVER_STARTED.register(VSplitListeners::onServerStarted);
+
 		ServerLifecycleEvents.SERVER_STOPPED.register((server) -> {
 			((FabricConfigFile)(ConfigSpec.serverSpec)).unload();
 		});

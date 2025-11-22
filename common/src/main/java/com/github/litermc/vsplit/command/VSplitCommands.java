@@ -12,6 +12,14 @@ import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 
+import org.valkyrienskies.core.api.ships.LoadedServerShip;
+import org.valkyrienskies.core.api.ships.ServerShip;
+import org.valkyrienskies.core.api.ships.Ship;
+import org.valkyrienskies.core.apigame.world.ServerShipWorldCore;
+import org.valkyrienskies.mod.common.VSGameUtilsKt;
+import org.valkyrienskies.mod.common.command.ShipArgument;
+import org.valkyrienskies.mod.mixinducks.feature.command.VSCommandSource;
+
 import java.util.Set;
 
 public final class VSplitCommands {
@@ -28,19 +36,43 @@ public final class VSplitCommands {
 				)
 				.executes((ctx) -> VSplitCommands.clean(ctx, false))
 			)
+			.then(Commands.literal("protect")
+				.then(Commands.argument("ships", ShipArgument.Companion.ships())
+					.then(Commands.argument("shouldProtect", BoolArgumentType.bool())
+						.executes((ctx) -> VSplitCommands.protect(ctx, BoolArgumentType.getBool(ctx, "shouldProtect")))
+					)
+					.executes((ctx) -> VSplitCommands.protect(ctx, true))
+				)
+			)
 		);
 	}
 
 	private static int clean(final CommandContext<CommandSourceStack> context, final boolean forceRemoval) throws CommandSyntaxException {
 		final CommandSourceStack source = context.getSource();
 		final MinecraftServer server = source.getServer();
-		source.sendSuccess(() -> Component.translatable("vsplit.command.clean.start"), false);
-		final int count = ShipCleaner.clean(server, forceRemoval);
-		if (count == 0) {
-			source.sendSuccess(() -> Component.translatable("vsplit.command.clean.success.none"), true);
-		} else {
-			source.sendSuccess(() -> Component.translatable("vsplit.command.clean.success", count), true);
+		ShipCleaner.clean(server, forceRemoval);
+		return 1;
+	}
+
+	private static int protect(final CommandContext<CommandSourceStack> context, final boolean shouldProtect) throws CommandSyntaxException {
+		final CommandSourceStack source = context.getSource();
+		final MinecraftServer server = source.getServer();
+		final ServerShipWorldCore world = VSGameUtilsKt.getShipObjectWorld(server);
+		final Set<Ship> ships = ShipArgument.Companion.getShips((CommandContext<VSCommandSource>) ((CommandContext<?>) (context)), "ships");
+		int count = 0;
+		for (final Ship ship : ships) {
+			if (!(ship instanceof ServerShip serverShip)) {
+				continue;
+			}
+			final LoadedServerShip loadedShip = world.getLoadedShips().getById(ship.getId());
+			if (loadedShip == null) {
+				continue;
+			}
+			ShipCleaner.setShipProtected(loadedShip, shouldProtect);
+			count++;
 		}
+		final int finalCount = count;
+		source.sendSuccess(() -> Component.translatable("vsplit.command.protect.success", finalCount), false);
 		return count;
 	}
 }

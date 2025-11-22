@@ -77,6 +77,7 @@ public final class ShipBlockCountCleaner implements ICleanListener {
 			if (BlockConnectivityApi.isAir(state)) {
 				continue;
 			}
+			// TODO: maintain a core flag instead of scan the whole ship?
 			if (!hasCore && Config.coreBlocks.contains(BuiltInRegistries.BLOCK.getKey(state.getBlock()))) {
 				hasCore = true;
 			}

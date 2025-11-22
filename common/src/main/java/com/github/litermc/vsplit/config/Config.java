@@ -16,9 +16,9 @@ public final class Config {
 	public static boolean asyncShipSplit = false;
 
 	/**
-	 * Ship cleanup will mark and clean ships periodically.
+	 * Should mark and clean ships periodically.
 	 */
-	public static boolean enableShipCleanup = true;
+	public static boolean enableShipPeriodicCleanup = true;
 
 	/**
 	 * Ship cleanup period in seconds. Note that ship's actual removal time is inbetween this period and double of it.

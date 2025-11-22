@@ -8,6 +8,7 @@ import com.github.litermc.vsplit.impl.clean.ShipPlayerProtectionCleaner;
 import com.github.litermc.vtil.api.assemble.ShipAllocator;
 import com.github.litermc.vtil.util.LevelUtil;
 
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 
@@ -86,7 +87,11 @@ public final class ShipCleaner {
 	 * @return clean ships count
 	 */
 	public static int clean(final MinecraftServer server, final boolean forceRemove) {
-		Constants.LOG.info("Cleaning ships. forceRemove = {}", forceRemove);
+		Constants.LOG.info("[vsplit]: Cleaning ships. forceRemove = {}", forceRemove);
+		server.getPlayerList().broadcastSystemMessage(
+			Constants.MESSAGE_PREFIX.copy().append(Component.translatable("vsplit.message.clean.start")),
+			false
+		);
 		int count = 0;
 		final ShipAllocator allocator = ShipAllocator.get(server);
 		final ServerShipWorldCore world = VSGameUtilsKt.getShipObjectWorld(server);
@@ -138,13 +143,25 @@ public final class ShipCleaner {
 			}
 			final boolean shouldClean = context.getCleanSuggestion();
 			if (!forceRemove && shouldClean != marked) {
-				Constants.LOG.debug("Ship {} marked = {}", ship.getId(), shouldClean);
+				Constants.LOG.debug("[vsplit]: Ship {} marked = {}", ship.getId(), shouldClean);
 				cleanAttachment.setMarked(shouldClean);
 			} else if (shouldClean) {
-				Constants.LOG.info("Cleaning ship {} ({})", ship.getId(), ship.getSlug());
+				Constants.LOG.info("[vsplit]: Cleaning ship {} ({})", ship.getId(), ship.getSlug());
+				// TODO: make a ship backup?
 				allocator.putShip(ship);
 				count++;
 			}
+		}
+		if (count == 0) {
+			server.getPlayerList().broadcastSystemMessage(
+				Constants.MESSAGE_PREFIX.copy().append(Component.translatable("vsplit.message.clean.success.none")),
+				false
+			);
+		} else {
+			server.getPlayerList().broadcastSystemMessage(
+				Constants.MESSAGE_PREFIX.copy().append(Component.translatable("vsplit.message.clean.success", count)),
+				false
+			);
 		}
 		return count;
 	}

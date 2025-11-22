@@ -1,5 +1,8 @@
 {
-	"vsplit.command.clean.start": "Start ship cleaning ...",
-	"vsplit.command.clean.success.none": "No ship was cleaned",
-	"vsplit.command.clean.success": "Cleaned %s ships"
+	"vsplit.command.protect.success": "Updated %s ships",
+	"vsplit.message.clean.warn.min": "Ship cleanup scheduled in %s minutes",
+	"vsplit.message.clean.warn.sec": "Ship cleanup scheduled in %s seconds",
+	"vsplit.message.clean.start": "Start ship cleaning ...",
+	"vsplit.message.clean.success": "Cleaned %s ships",
+	"vsplit.message.clean.success.none": "No ship was cleaned"
 }

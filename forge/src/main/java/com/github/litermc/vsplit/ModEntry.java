@@ -10,6 +10,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.level.LevelEvent;
+import net.minecraftforge.event.server.ServerStartedEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.ModLoadingContext;
@@ -45,6 +46,11 @@ public class ModEntry {
 		if (event.getLevel() instanceof ServerLevel level) {
 			VSplitListeners.onServerLevelUnload(level);
 		}
+	}
+
+	@SubscribeEvent
+	public static void onServerStarted(final ServerStartedEvent event) {
+		VSplitListeners.onServerStarted(event.getServer());
 	}
 
 	@SubscribeEvent

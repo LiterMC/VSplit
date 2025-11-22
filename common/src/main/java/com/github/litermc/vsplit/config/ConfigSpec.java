@@ -14,7 +14,7 @@ public final class ConfigSpec {
 	public static final ConfigFile.Value<Boolean> ENABLE_SHIP_SPLIT;
 	public static final ConfigFile.Value<Boolean> ASYNC_SHIP_SPLIT;
 
-	public static final ConfigFile.Value<Boolean> ENABLE_SHIP_CLEANUP;
+	public static final ConfigFile.Value<Boolean> ENABLE_SHIP_PERIODIC_CLEANUP;
 	public static final ConfigFile.Value<Integer> SHIP_CLEAN_PERIOD;
 
 	public static final ConfigFile.Value<Boolean> ENABLE_BLOCK_COUNT_CLEANUP;
@@ -50,9 +50,9 @@ public final class ConfigSpec {
 				.comment("Ship cleanup settings")
 				.push("cleanup");
 
-			ENABLE_SHIP_CLEANUP = builder
-				.comment("Ship cleanup will mark and clean ships periodically.")
-				.define("enable_ship_cleanup", Config.enableShipCleanup);
+			ENABLE_SHIP_PERIODIC_CLEANUP = builder
+				.comment("Should mark and clean ships periodically.")
+				.define("enable_ship_periodic_cleanup", Config.enableShipPeriodicCleanup);
 
 			SHIP_CLEAN_PERIOD = builder
 				.comment("Ship cleanup period in seconds. Note that ship's actual removal time is inbetween this period and double of it.")
@@ -116,7 +116,7 @@ public final class ConfigSpec {
 	public static void syncServer(Path path) {
 		Config.enableShipSplit = ENABLE_SHIP_SPLIT.get();
 		Config.asyncShipSplit = ASYNC_SHIP_SPLIT.get();
-		Config.enableShipCleanup = ENABLE_SHIP_CLEANUP.get();
+		Config.enableShipPeriodicCleanup = ENABLE_SHIP_PERIODIC_CLEANUP.get();
 		Config.shipCleanPeriod = SHIP_CLEAN_PERIOD.get();
 		Config.enableBlockCountCleanup = ENABLE_BLOCK_COUNT_CLEANUP.get();
 		Config.minimumBlocksShipNeeds = MINIMUM_BLOCKS_SHIP_NEEDS.get();
