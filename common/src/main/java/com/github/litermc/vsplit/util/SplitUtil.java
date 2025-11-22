@@ -229,10 +229,7 @@ public final class SplitUtil {
 				final PartHolder holder1 = holder.getForward();
 				final Part part = holder1.part;
 				if (part.complete) {
-					// // TODO: why will this happen?
-					// parts.remove(holder);
 					throw new RuntimeException("unreachable");
-					// continue;
 				}
 				final BlockPos pos = part.poll();
 				if (pos == null) {

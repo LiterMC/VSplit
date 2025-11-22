@@ -1,0 +1,5 @@
+{
+	"vsplit.command.clean.start": "Start ship cleaning ...",
+	"vsplit.command.clean.success.none": "No ship was cleaned",
+	"vsplit.command.clean.success": "Cleaned %s ships"
+}
