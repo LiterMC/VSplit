@@ -59,7 +59,7 @@ public final class Config {
 	/**
 	 * The distance in chunks a player can prevent ship cleanup.
 	 */
-	public static int playerProtectionRadius = 32;
+	public static int playerProtectionRadius = 2;
 
 	private Config() {}
 }
