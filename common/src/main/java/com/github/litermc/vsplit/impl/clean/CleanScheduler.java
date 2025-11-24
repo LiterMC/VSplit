@@ -32,6 +32,9 @@ public final class CleanScheduler {
 		}
 		final Duration timeLeft = Duration.between(Instant.now(), nextCleanup);
 		if (!timeLeft.isNegative()) {
+			if (!Config.cleanupMessageLevel.showSchedule()) {
+				return;
+			}
 			final long dur = timeLeft.getSeconds();
 			for (int i = 0; i < lastHint; i++) {
 				final long hint = HINT_DURATIONS[i];

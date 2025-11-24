@@ -2,6 +2,7 @@ package com.github.litermc.vsplit.api.clean;
 
 import com.github.litermc.vsplit.Constants;
 import com.github.litermc.vsplit.accessor.ShipObjectServerAccessor;
+import com.github.litermc.vsplit.config.Config;
 import com.github.litermc.vsplit.impl.attachment.ShipCleanAttachment;
 import com.github.litermc.vsplit.impl.clean.ShipBlockCountCleaner;
 import com.github.litermc.vsplit.impl.clean.ShipPlayerProtectionCleaner;
@@ -9,10 +10,12 @@ import com.github.litermc.vtil.api.assemble.ShipAllocator;
 import com.github.litermc.vtil.api.connectivity.ShipConnectivityApi;
 import com.github.litermc.vtil.util.LevelUtil;
 
+import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 
+import org.joml.primitives.AABBic;
 import org.valkyrienskies.core.api.ships.ServerShip;
 import org.valkyrienskies.core.apigame.world.ServerShipWorldCore;
 import org.valkyrienskies.mod.common.VSGameUtilsKt;
@@ -89,10 +92,12 @@ public final class ShipCleaner {
 	 */
 	public static int clean(final MinecraftServer server, final boolean forceRemove) {
 		Constants.LOG.info("[vsplit]: Cleaning ships. forceRemove = {}", forceRemove);
-		server.getPlayerList().broadcastSystemMessage(
-			Constants.MESSAGE_PREFIX.copy().append(Component.translatable("vsplit.message.clean.start")),
-			false
-		);
+		if (Config.cleanupMessageLevel.showGeneral()) {
+			server.getPlayerList().broadcastSystemMessage(
+				Constants.MESSAGE_PREFIX.copy().append(Component.translatable("vsplit.message.clean.start")),
+				false
+			);
+		}
 		int count = 0;
 		final ShipAllocator allocator = ShipAllocator.get(server);
 		final ServerShipWorldCore world = VSGameUtilsKt.getShipObjectWorld(server);
@@ -163,6 +168,14 @@ public final class ShipCleaner {
 					// TODO: make a ship backup?
 					for (final ServerShip part : ships) {
 						Constants.LOG.info("[vsplit]: Cleaning ship {} ({}) [{}]", part.getId(), part.getSlug(), ships.size());
+						if (Config.shipCleanMethod.isDestroy()) {
+							final AABBic box = part.getShipAABB();
+							if (box != null) {
+								for (final BlockPos pos : BlockPos.betweenClosed(box.minX(), box.minY(), box.minZ(), box.maxX(), box.maxY(), box.maxZ())) {
+									level.destroyBlock(pos, true, null, 1);
+								}
+							}
+						}
 						allocator.putShip(part);
 						count++;
 					}
@@ -170,15 +183,19 @@ public final class ShipCleaner {
 			}
 		}
 		if (count == 0) {
-			server.getPlayerList().broadcastSystemMessage(
-				Constants.MESSAGE_PREFIX.copy().append(Component.translatable("vsplit.message.clean.success.none")),
-				false
-			);
+			if (Config.cleanupMessageLevel.showGeneral()) {
+				server.getPlayerList().broadcastSystemMessage(
+					Constants.MESSAGE_PREFIX.copy().append(Component.translatable("vsplit.message.clean.success.none")),
+					false
+				);
+			}
 		} else {
-			server.getPlayerList().broadcastSystemMessage(
-				Constants.MESSAGE_PREFIX.copy().append(Component.translatable("vsplit.message.clean.success", count)),
-				false
-			);
+			if (Config.cleanupMessageLevel.showCleaned()) {
+				server.getPlayerList().broadcastSystemMessage(
+					Constants.MESSAGE_PREFIX.copy().append(Component.translatable("vsplit.message.clean.success", count)),
+					false
+				);
+			}
 		}
 		return count;
 	}

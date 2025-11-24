@@ -48,7 +48,6 @@ public final class VSplitListeners {
 	}
 
 	public static void onPlayerBreakBlock(final ServerPlayer player, final BlockPos pos) {
-		System.out.println("Config.enableTreeFalling: " + Config.enableTreeFalling);
 		if (!Config.enableTreeFalling) {
 			return;
 		}

@@ -18,6 +18,8 @@ public final class ConfigSpec {
 
 	public static final ConfigFile.Value<Boolean> ENABLE_SHIP_PERIODIC_CLEANUP;
 	public static final ConfigFile.Value<Integer> SHIP_CLEAN_PERIOD;
+	public static final ConfigFile.Value<ShipCleanMethod> SHIP_CLEAN_METHOD;
+	public static final ConfigFile.Value<CleanupMessageLevel> CLEANUP_MESSAGE_LEVEL;
 
 	public static final ConfigFile.Value<Boolean> ENABLE_BLOCK_COUNT_CLEANUP;
 	public static final ConfigFile.Value<Integer> MINIMUM_BLOCKS_SHIP_NEEDS;
@@ -71,6 +73,24 @@ public final class ConfigSpec {
 			SHIP_CLEAN_PERIOD = builder
 				.comment("Ship cleanup period in seconds. Note that ship's actual removal time is inbetween this period and double of it.")
 				.defineInRange("ship_clean_period", Config.shipCleanPeriod, 0, Integer.MAX_VALUE);
+
+			SHIP_CLEAN_METHOD = builder
+				.comment(
+					"Ship remove method.\n" +
+					"DESTROY: destroy all blocks on the ship and leave item drops.\n" +
+					"REMOVE: simply remove the ship."
+				)
+				.defineEnum("ship_clean_method", Config.shipCleanMethod);
+
+			CLEANUP_MESSAGE_LEVEL = builder
+				.comment(
+					"Cleanup messages.\n" +
+					"FULL: Show cleanup warn, and all other messages.\n" +
+					"NO_WARN: Do not show cleanup warn.\n" +
+					"MINIMUM: Only show cleaned ship count.\n" +
+					"NONE: Do not show any messages."
+				)
+				.defineEnum("cleanup_message_level", Config.cleanupMessageLevel);
 
 			{
 				builder
@@ -134,6 +154,8 @@ public final class ConfigSpec {
 		Config.decayMethod = DECAY_METHOD.get();
 		Config.enableShipPeriodicCleanup = ENABLE_SHIP_PERIODIC_CLEANUP.get();
 		Config.shipCleanPeriod = SHIP_CLEAN_PERIOD.get();
+		Config.shipCleanMethod = SHIP_CLEAN_METHOD.get();
+		Config.cleanupMessageLevel = CLEANUP_MESSAGE_LEVEL.get();
 		Config.enableBlockCountCleanup = ENABLE_BLOCK_COUNT_CLEANUP.get();
 		Config.minimumBlocksShipNeeds = MINIMUM_BLOCKS_SHIP_NEEDS.get();
 		Config.coreBlockBehaviour = CORE_BLOCK_BEHAVIOUR.get();

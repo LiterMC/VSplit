@@ -38,6 +38,22 @@ public final class Config {
 	public static int shipCleanPeriod = 60 * 60 * 3;
 
 	/**
+	 * Ship remove method.
+	 * DESTROY: destroy all blocks on the ship and leave item drops.
+	 * REMOVE: simply remove the ship.
+	 */
+	public static ShipCleanMethod shipCleanMethod = ShipCleanMethod.REMOVE;
+
+	/**
+	 * Cleanup messages.
+	 * FULL: Show cleanup warn, and all other messages.
+	 * NO_WARN: Do not show cleanup warn.
+	 * MINIMUM: Only show cleaned ship count.
+	 * NONE: Do not show any messages.
+	 */
+	public static CleanupMessageLevel cleanupMessageLevel = CleanupMessageLevel.FULL;
+
+	/**
 	 * Cleanup ships that do not have enough blocks and/or do not have Core blocks present.
 	 */
 	public static boolean enableBlockCountCleanup = true;
