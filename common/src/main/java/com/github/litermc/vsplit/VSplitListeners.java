@@ -63,18 +63,14 @@ public final class VSplitListeners {
 		if (state.getOptionalValue(RotatedPillarBlock.AXIS).map(axis -> axis != Direction.Axis.Y).orElse(true)) {
 			return;
 		}
-		System.out.println("checking ...");
 		final BlockPos.MutableBlockPos leafPos = pos.mutable();
 		final int maxY = Math.min(pos.getY() + 32, level.getMaxBuildHeight());
 		for (int y = pos.getY() + 1; y <= maxY; y++) {
 			leafPos.setY(y);
 			final BlockState st = level.getBlockState(leafPos);
 			if (st.is(BlockTags.LEAVES)) {
-				System.out.println("found leave " + st.getOptionalValue(LeavesBlock.PERSISTENT).orElse(true));
 				if (!st.getOptionalValue(LeavesBlock.PERSISTENT).orElse(true)) {
-					System.out.println("assembling tree ...");
 					final ServerShip ship = AssembleUtil.assembleTree(level, pos, state);
-					System.out.println("ship " + ship);
 					if (ship != null) {
 						final int DEFAULT_FORCE_DECAY_TIMEOUT = 20 * 60 * 10; // 10 min
 						ship.setSlug(DecayAttachment.DECAY_PREFIX + "tree-" + ship.getId());
