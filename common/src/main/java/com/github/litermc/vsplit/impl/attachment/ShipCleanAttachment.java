@@ -1,9 +1,9 @@
-package com.github.litermc.vsplit.attachment;
+package com.github.litermc.vsplit.impl.attachment;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonSetter;
-import org.valkyrienskies.core.api.ships.LoadedServerShip;
+import org.valkyrienskies.core.api.ships.ServerShip;
 
 @JsonAutoDetect(
 	fieldVisibility = JsonAutoDetect.Visibility.NONE,
@@ -35,7 +35,7 @@ public final class ShipCleanAttachment {
 		this.marked = marked;
 	}
 
-	public static ShipCleanAttachment get(final LoadedServerShip ship) {
+	public static ShipCleanAttachment get(final ServerShip ship) {
 		final ShipCleanAttachment attachment = ship.getAttachment(ShipCleanAttachment.class);
 		if (attachment != null) {
 			return attachment;

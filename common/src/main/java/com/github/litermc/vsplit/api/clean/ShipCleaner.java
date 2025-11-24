@@ -2,27 +2,28 @@ package com.github.litermc.vsplit.api.clean;
 
 import com.github.litermc.vsplit.Constants;
 import com.github.litermc.vsplit.accessor.ShipObjectServerAccessor;
-import com.github.litermc.vsplit.attachment.ShipCleanAttachment;
+import com.github.litermc.vsplit.impl.attachment.ShipCleanAttachment;
 import com.github.litermc.vsplit.impl.clean.ShipBlockCountCleaner;
 import com.github.litermc.vsplit.impl.clean.ShipPlayerProtectionCleaner;
 import com.github.litermc.vtil.api.assemble.ShipAllocator;
+import com.github.litermc.vtil.api.connectivity.ShipConnectivityApi;
 import com.github.litermc.vtil.util.LevelUtil;
 
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 
-import org.valkyrienskies.core.api.ships.LoadedServerShip;
 import org.valkyrienskies.core.api.ships.ServerShip;
 import org.valkyrienskies.core.apigame.world.ServerShipWorldCore;
 import org.valkyrienskies.mod.common.VSGameUtilsKt;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.ArrayList;
+import java.util.Set;
 
 public final class ShipCleaner {
 	private static LinkedHashSet<ICleanListener> REGISTERING_LISTENERS = new LinkedHashSet<>();
@@ -70,7 +71,7 @@ public final class ShipCleaner {
 	 * @param ship    The ship.
 	 * @param protect Whether or not the ship should be prevented from cleaning.
 	 */
-	public static void setShipProtected(final LoadedServerShip ship, final boolean protect) {
+	public static void setShipProtected(final ServerShip ship, final boolean protect) {
 		final ShipCleanAttachment attachment = ShipCleanAttachment.get(ship);
 		attachment.setProtected(protect);
 		if (protect) {
@@ -96,7 +97,7 @@ public final class ShipCleaner {
 		final ShipAllocator allocator = ShipAllocator.get(server);
 		final ServerShipWorldCore world = VSGameUtilsKt.getShipObjectWorld(server);
 		final List<ICleanListener> generalListeners = getListeners();
-		for (final LoadedServerShip ship : new ShipAllocator.SafeShipIterable<>(world.getLoadedShips())) {
+		for (final ServerShip ship : new ShipAllocator.SafeShipIterable<>(world.getAllShips())) {
 			final ServerLevel level = LevelUtil.getLevel(ship.getChunkClaimDimension());
 			final ShipCleanAttachment cleanAttachment = ShipCleanAttachment.get(ship);
 			if (cleanAttachment.isProtected()) {
@@ -142,14 +143,30 @@ public final class ShipCleaner {
 				listener.onShipClean(context);
 			}
 			final boolean shouldClean = context.getCleanSuggestion();
-			if (!forceRemove && shouldClean != marked) {
+			if (shouldClean != marked) {
 				Constants.LOG.debug("[vsplit]: Ship {} marked = {}", ship.getId(), shouldClean);
 				cleanAttachment.setMarked(shouldClean);
-			} else if (shouldClean) {
-				Constants.LOG.info("[vsplit]: Cleaning ship {} ({})", ship.getId(), ship.getSlug());
-				// TODO: make a ship backup?
-				allocator.putShip(ship);
-				count++;
+			}
+			if (shouldClean && (forceRemove || marked)) {
+				final Set<ServerShip> ships = ShipConnectivityApi.getAllConnectedShipsAndSelf(ship.getId());
+				boolean clean = true;
+				if (ships.size() > 1) {
+					for (final ServerShip part : ships) {
+						final ShipCleanAttachment ca = ShipCleanAttachment.get(part);
+						if (!ca.isMarked()) {
+							clean = false;
+							break;
+						}
+					}
+				}
+				if (clean) {
+					// TODO: make a ship backup?
+					for (final ServerShip part : ships) {
+						Constants.LOG.info("[vsplit]: Cleaning ship {} ({}) [{}]", part.getId(), part.getSlug(), ships.size());
+						allocator.putShip(part);
+						count++;
+					}
+				}
 			}
 		}
 		if (count == 0) {

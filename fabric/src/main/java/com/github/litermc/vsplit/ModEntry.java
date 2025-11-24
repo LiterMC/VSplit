@@ -10,6 +10,8 @@ import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerWorldEvents;
+import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.storage.LevelResource;
 
 public class ModEntry implements ModInitializer {
@@ -43,5 +45,12 @@ public class ModEntry implements ModInitializer {
 
 		ServerTickEvents.START_SERVER_TICK.register(VSplitListeners::preServerTick);
 		ServerTickEvents.END_SERVER_TICK.register(VSplitListeners::postServerTick);
+
+		PlayerBlockBreakEvents.BEFORE.register((level, player, pos, state, be) -> {
+			if (player instanceof final ServerPlayer serverPlayer) {
+				VSplitListeners.onPlayerBreakBlock(serverPlayer, pos);
+			}
+			return true;
+		});
 	}
 }

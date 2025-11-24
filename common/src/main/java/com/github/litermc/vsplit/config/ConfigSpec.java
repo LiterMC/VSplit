@@ -13,6 +13,8 @@ public final class ConfigSpec {
 
 	public static final ConfigFile.Value<Boolean> ENABLE_SHIP_SPLIT;
 	public static final ConfigFile.Value<Boolean> ASYNC_SHIP_SPLIT;
+	public static final ConfigFile.Value<Boolean> ENABLE_TREE_FALLING;
+	public static final ConfigFile.Value<DecayMethod> DECAY_METHOD;
 
 	public static final ConfigFile.Value<Boolean> ENABLE_SHIP_PERIODIC_CLEANUP;
 	public static final ConfigFile.Value<Integer> SHIP_CLEAN_PERIOD;
@@ -41,6 +43,18 @@ public final class ConfigSpec {
 			ASYNC_SHIP_SPLIT = builder
 				.comment("Use async ship assembly, this will improve split performance but can also cause some unknown issues.")
 				.define("async_ship_split", Config.asyncShipSplit);
+
+			ENABLE_TREE_FALLING = builder
+				.comment("Player cutted tree will form a falling ship.")
+				.define("enable_tree_falling", Config.enableTreeFalling);
+
+			DECAY_METHOD = builder
+				.comment(
+					"Decay method.\n" +
+					"DEFAULT: just destroy decaying block.\n" +
+					"NO_SPLIT: destroy decaying block and blocks splitting out (better for performance)."
+ 				)
+ 				.defineEnum("decay_method", Config.decayMethod);
 
 			builder.pop();
 		}
@@ -116,6 +130,8 @@ public final class ConfigSpec {
 	public static void syncServer(Path path) {
 		Config.enableShipSplit = ENABLE_SHIP_SPLIT.get();
 		Config.asyncShipSplit = ASYNC_SHIP_SPLIT.get();
+		Config.enableTreeFalling = ENABLE_TREE_FALLING.get();
+		Config.decayMethod = DECAY_METHOD.get();
 		Config.enableShipPeriodicCleanup = ENABLE_SHIP_PERIODIC_CLEANUP.get();
 		Config.shipCleanPeriod = SHIP_CLEAN_PERIOD.get();
 		Config.enableBlockCountCleanup = ENABLE_BLOCK_COUNT_CLEANUP.get();

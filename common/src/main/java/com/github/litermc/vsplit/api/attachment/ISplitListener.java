@@ -1,6 +1,7 @@
 package com.github.litermc.vsplit.api.attachment;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
 
 import org.valkyrienskies.core.api.ships.ServerShip;
 
@@ -19,6 +20,13 @@ public interface ISplitListener {
 	void onShipSplit(Context context);
 
 	interface Context {
+		/**
+		 * Get the level where split happens
+		 *
+		 * @return the level the splitting ship is in
+		 */
+		ServerLevel getLevel();
+
 		/**
 		 * Get the instance of the ship where the splitting is happening.
 		 *

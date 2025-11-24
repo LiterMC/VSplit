@@ -64,11 +64,7 @@ public final class VSplitCommands {
 			if (!(ship instanceof ServerShip serverShip)) {
 				continue;
 			}
-			final LoadedServerShip loadedShip = world.getLoadedShips().getById(ship.getId());
-			if (loadedShip == null) {
-				continue;
-			}
-			ShipCleaner.setShipProtected(loadedShip, shouldProtect);
+			ShipCleaner.setShipProtected(serverShip, shouldProtect);
 			count++;
 		}
 		final int finalCount = count;

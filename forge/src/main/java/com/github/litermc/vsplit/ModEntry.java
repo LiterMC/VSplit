@@ -7,8 +7,10 @@ import com.github.litermc.vsplit.platform.ForgeConfigFile;
 
 import com.electronwill.nightconfig.core.file.FileConfig;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.event.level.BlockEvent;
 import net.minecraftforge.event.level.LevelEvent;
 import net.minecraftforge.event.server.ServerStartedEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -64,6 +66,13 @@ public class ModEntry {
 	@SubscribeEvent
 	public static void onRegisterCommands(final RegisterCommandsEvent event) {
 		VSplitCommands.register(event.getDispatcher());
+	}
+
+	@SubscribeEvent
+	public static void onBlockBreak(final BlockEvent.BreakEvent event) {
+		if (event.getPlayer() instanceof final ServerPlayer player) {
+			VSplitListeners.onPlayerBreakBlock(player, event.getPos());
+		}
 	}
 
 	// Following code comes from CC: Tweaked

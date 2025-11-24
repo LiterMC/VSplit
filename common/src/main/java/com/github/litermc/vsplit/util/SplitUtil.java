@@ -95,7 +95,7 @@ public final class SplitUtil {
 				} else {
 					listeners.addAll(slGetter.vsplit$getSplitListeners());
 					callbacks = new ArrayList<>(listeners.size());
-					final SplitContext context = new SplitContext(ship, Collections.unmodifiableSet(part), callbacks);
+					final SplitContext context = new SplitContext(level, ship, Collections.unmodifiableSet(part), callbacks);
 					for (final ISplitListener listener : listeners) {
 						listener.onShipSplit(context);
 					}
@@ -334,14 +334,26 @@ public final class SplitUtil {
 	}
 
 	private static final class SplitContext implements ISplitListener.Context {
+		private final ServerLevel level;
 		private final ServerShip ship;
 		private final Set<BlockPos> blocks;
 		private final List<Consumer<ServerShip>> callbacks;
 
-		private SplitContext(final ServerShip ship, final Set<BlockPos> blocks, final List<Consumer<ServerShip>> callbacks) {
+		private SplitContext(
+			final ServerLevel level,
+			final ServerShip ship,
+			final Set<BlockPos> blocks,
+			final List<Consumer<ServerShip>> callbacks
+		) {
+			this.level = level;
 			this.ship = ship;
 			this.blocks = blocks;
 			this.callbacks = callbacks;
+		}
+
+		@Override
+		public ServerLevel getLevel() {
+			return this.level;
 		}
 
 		@Override

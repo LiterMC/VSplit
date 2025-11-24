@@ -16,6 +16,18 @@ public final class Config {
 	public static boolean asyncShipSplit = false;
 
 	/**
+	 * Player cutted tree will form a falling ship.
+	 */
+	public static boolean enableTreeFalling = true;
+
+	/**
+	 * Decay method.
+	 * DEFAULT: just destroy decaying block.
+	 * NO_SPLIT: destroy decaying block and blocks splitting out (better for performance).
+	 */
+	public static DecayMethod decayMethod = DecayMethod.DEFAULT;
+
+	/**
 	 * Should mark and clean ships periodically.
 	 */
 	public static boolean enableShipPeriodicCleanup = true;
