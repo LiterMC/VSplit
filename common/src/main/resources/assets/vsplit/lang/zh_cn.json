@@ -1,0 +1,8 @@
+{
+	"vsplit.command.protect.success": "更新了 %s 个物理结构",
+	"vsplit.message.clean.warn.min": "物理结构清理将在 %s 分钟后进行",
+	"vsplit.message.clean.warn.sec": "物理结构清理将在 %s 秒后进行",
+	"vsplit.message.clean.start": "物理结构扫地姬开始工作……",
+	"vsplit.message.clean.success": "清理了 %s 个物理结构",
+	"vsplit.message.clean.success.none": "没有物理结构需要被清理"
+}
