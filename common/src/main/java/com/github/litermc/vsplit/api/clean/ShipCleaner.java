@@ -152,7 +152,7 @@ public final class ShipCleaner {
 				Constants.LOG.debug("[vsplit]: Ship {} marked = {}", ship.getId(), shouldClean);
 				cleanAttachment.setMarked(shouldClean);
 			}
-			if (shouldClean && (forceRemove || marked)) {
+			if (shouldClean && (forceRemove || marked) && !ShipConnectivityApi.isConnectedToGround(ship.getId())) {
 				final Set<ServerShip> ships = ShipConnectivityApi.getAllConnectedShipsAndSelf(ship.getId());
 				boolean clean = true;
 				if (ships.size() > 1) {
@@ -167,7 +167,7 @@ public final class ShipCleaner {
 				if (clean) {
 					// TODO: make a ship backup?
 					for (final ServerShip part : ships) {
-						Constants.LOG.info("[vsplit]: Cleaning ship {} ({}) [{}]", part.getId(), part.getSlug(), ships.size());
+						Constants.LOG.info("[vsplit]: Cleaning ship {} [slug={}, parts={}]", part.getId(), part.getSlug(), ships.size());
 						if (Config.shipCleanMethod.isDestroy()) {
 							final AABBic box = part.getShipAABB();
 							if (box != null) {
