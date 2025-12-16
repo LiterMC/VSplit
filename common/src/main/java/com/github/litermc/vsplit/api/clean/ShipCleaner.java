@@ -6,6 +6,7 @@ import com.github.litermc.vsplit.config.Config;
 import com.github.litermc.vsplit.impl.attachment.ShipCleanAttachment;
 import com.github.litermc.vsplit.impl.clean.ShipBlockCountCleaner;
 import com.github.litermc.vsplit.impl.clean.ShipPlayerProtectionCleaner;
+import com.github.litermc.vsplit.impl.clean.ShipTransformProviderProtectionCleaner;
 import com.github.litermc.vtil.api.assemble.ShipAllocator;
 import com.github.litermc.vtil.api.connectivity.ShipConnectivityApi;
 import com.github.litermc.vtil.util.LevelUtil;
