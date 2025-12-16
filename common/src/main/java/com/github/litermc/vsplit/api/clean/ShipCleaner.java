@@ -35,6 +35,7 @@ public final class ShipCleaner {
 	static {
 		registerListener(ShipBlockCountCleaner.INSTANCE);
 		registerListener(ShipPlayerProtectionCleaner.INSTANCE);
+		registerListener(ShipTransformProviderProtectionCleaner.INSTANCE);
 	}
 
 	private ShipCleaner() {}

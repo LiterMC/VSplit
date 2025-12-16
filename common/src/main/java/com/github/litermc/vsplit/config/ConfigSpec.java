@@ -26,6 +26,7 @@ public final class ConfigSpec {
 	public static final ConfigFile.Value<CoreBlockBehaviour> CORE_BLOCK_BEHAVIOUR;
 	public static final ConfigFile.Value<List<? extends String>> CORE_BLOCKS;
 
+	public static final ConfigFile.Value<Boolean> ENABLE_TRANSFORM_PROVIDER_PROTECTION;
 	public static final ConfigFile.Value<Boolean> ENABLE_PLAYER_PROTECTION;
 	public static final ConfigFile.Value<Integer> PLAYER_PROTECTION_RADIUS;
 
@@ -127,8 +128,12 @@ public final class ConfigSpec {
 
 			{
 				builder
-					.comment("Block count cleaner settings")
-					.push("block_count_cleaner");
+					.comment("Clean protection settings")
+					.push("clean_protection");
+
+				ENABLE_TRANSFORM_PROVIDER_PROTECTION = builder
+					.comment("Prevent ships has transform providers to be cleaned (e.g. Create: Interactive contraptions)")
+					.define("enable_transform_provider_protection", Config.enableTransformProviderProtection);
 
 				ENABLE_PLAYER_PROTECTION = builder
 					.comment("Prevent ship cleanup within player's certain distance.")
@@ -152,14 +157,18 @@ public final class ConfigSpec {
 		Config.asyncShipSplit = ASYNC_SHIP_SPLIT.get();
 		Config.enableTreeFalling = ENABLE_TREE_FALLING.get();
 		Config.decayMethod = DECAY_METHOD.get();
+
 		Config.enableShipPeriodicCleanup = ENABLE_SHIP_PERIODIC_CLEANUP.get();
 		Config.shipCleanPeriod = SHIP_CLEAN_PERIOD.get();
 		Config.shipCleanMethod = SHIP_CLEAN_METHOD.get();
 		Config.cleanupMessageLevel = CLEANUP_MESSAGE_LEVEL.get();
+
 		Config.enableBlockCountCleanup = ENABLE_BLOCK_COUNT_CLEANUP.get();
 		Config.minimumBlocksShipNeeds = MINIMUM_BLOCKS_SHIP_NEEDS.get();
 		Config.coreBlockBehaviour = CORE_BLOCK_BEHAVIOUR.get();
 		Config.coreBlocks = Set.copyOf(CORE_BLOCKS.get().stream().map(ResourceLocation::new).toList());
+
+		Config.enableTransformProviderProtection = ENABLE_TRANSFORM_PROVIDER_PROTECTION.get();
 		Config.enablePlayerProtection = ENABLE_PLAYER_PROTECTION.get();
 		Config.playerProtectionRadius = PLAYER_PROTECTION_RADIUS.get();
 	}

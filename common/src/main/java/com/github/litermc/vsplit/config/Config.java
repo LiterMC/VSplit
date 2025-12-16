@@ -80,6 +80,11 @@ public final class Config {
 	);
 
 	/**
+	 * Prevent ships has transform providers to be cleaned (e.g. Create: Interactive contraptions)
+	 */
+	public static boolean enableTransformProviderProtection = true;
+
+	/**
 	 * Prevent ship cleanup within player's certain distance.
 	 */
 	public static boolean enablePlayerProtection = true;
