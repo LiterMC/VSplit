@@ -9,3 +9,4 @@ By default, only blocks that are direct neighbours can be connected. Some specia
 
 Modded blocks can also has themselves logic by implement vtil's [`IBlockAnchor`](https://github.com/LiterMC/vtil/blob/1.20.1/common/src/main/java/com/github/litermc/vtil/api/connectivity/IBlockAnchor.java) interface.
 Ship attachments can implement [`ISplitListener`](https://github.com/LiterMC/VSplit/blob/1.20.1/common/src/main/java/com/github/litermc/vsplit/api/attachment/ISplitListener.java) to listen when a split happens and define special logic about it.
+a
