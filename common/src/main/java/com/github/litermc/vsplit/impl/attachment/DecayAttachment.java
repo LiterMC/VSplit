@@ -19,7 +19,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.google.common.collect.ImmutableMap;
 import org.valkyrienskies.core.api.ships.LoadedServerShip;
-import org.valkyrienskies.core.api.ships.ServerTickListener;
 import org.valkyrienskies.mod.common.VSGameUtilsKt;
 
 @JsonAutoDetect(
@@ -58,12 +57,12 @@ public final class DecayAttachment implements IServerTickListener, ISplitListene
 	public void onServerTick(final ServerLevel level, final LoadedServerShip ship) {
 		final String slug = ship.getSlug();
 		if (slug == null || !slug.startsWith(DECAY_PREFIX)) {
-			ship.saveAttachment(DecayAttachment.class, null);
+			ship.removeAttachment(DecayAttachment.class);
 			return;
 		}
 		this.forceDecayCounter--;
 		if (this.forceDecayCounter < 0) {
-			ship.saveAttachment(DecayAttachment.class, null);
+			ship.removeAttachment(DecayAttachment.class);
 			VSGameUtilsKt.getShipObjectWorld(level).deleteShip(ship);
 			return;
 		}
@@ -78,7 +77,7 @@ public final class DecayAttachment implements IServerTickListener, ISplitListene
 			return;
 		}
 		context.addAfterSplit((newShip) -> {
-			newShip.saveAttachment(DecayAttachment.class, new DecayAttachment(this.forceDecayCounter));
+			newShip.setAttachment(new DecayAttachment(this.forceDecayCounter));
 		});
 	}
 

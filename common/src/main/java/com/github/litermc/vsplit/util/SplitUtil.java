@@ -47,7 +47,7 @@ public final class SplitUtil {
 		if (!Config.enableShipSplit) {
 			return;
 		}
-		final LoadedServerShip ship = VSGameUtilsKt.getShipObjectManagingPos(level, pos);
+		final LoadedServerShip ship = VSGameUtilsKt.getLoadedShipManagingPos(level, pos);
 		if (ship == null) {
 			return;
 		}
@@ -89,7 +89,7 @@ public final class SplitUtil {
 			}
 			final String slug = extractBaseSlug(ship.getSlug());
 			for (final Set<BlockPos> part : parts) {
-				final List<Consumer<ServerShip>> callbacks;
+				final List<Consumer<LoadedServerShip>> callbacks;
 				if (slGetter == null) {
 					callbacks = null;
 				} else {
@@ -110,8 +110,8 @@ public final class SplitUtil {
 						if (callbacks == null) {
 							return;
 						}
-						for (final Consumer<ServerShip> callback : callbacks) {
-							callback.accept(splittedShip);
+						for (final Consumer<LoadedServerShip> callback : callbacks) {
+							callback.accept((LoadedServerShip) splittedShip);
 						}
 					});
 					continue;
@@ -124,8 +124,8 @@ public final class SplitUtil {
 				if (callbacks == null) {
 					continue;
 				}
-				for (final Consumer<ServerShip> callback : callbacks) {
-					callback.accept(splittedShip);
+				for (final Consumer<LoadedServerShip> callback : callbacks) {
+					callback.accept((LoadedServerShip) splittedShip);
 				}
 			}
 		}
@@ -335,15 +335,15 @@ public final class SplitUtil {
 
 	private static final class SplitContext implements ISplitListener.Context {
 		private final ServerLevel level;
-		private final ServerShip ship;
+		private final LoadedServerShip ship;
 		private final Set<BlockPos> blocks;
-		private final List<Consumer<ServerShip>> callbacks;
+		private final List<Consumer<LoadedServerShip>> callbacks;
 
 		private SplitContext(
 			final ServerLevel level,
-			final ServerShip ship,
+			final LoadedServerShip ship,
 			final Set<BlockPos> blocks,
-			final List<Consumer<ServerShip>> callbacks
+			final List<Consumer<LoadedServerShip>> callbacks
 		) {
 			this.level = level;
 			this.ship = ship;
@@ -357,7 +357,7 @@ public final class SplitUtil {
 		}
 
 		@Override
-		public ServerShip getShip() {
+		public LoadedServerShip getShip() {
 			return this.ship;
 		}
 
@@ -367,7 +367,7 @@ public final class SplitUtil {
 		}
 
 		@Override
-		public void addAfterSplit(final Consumer<ServerShip> callback) {
+		public void addAfterSplit(final Consumer<LoadedServerShip> callback) {
 			if (callback == null) {
 				throw new IllegalArgumentException("callback cannot be null");
 			}

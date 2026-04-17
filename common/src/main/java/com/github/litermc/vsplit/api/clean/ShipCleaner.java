@@ -17,8 +17,9 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 
 import org.joml.primitives.AABBic;
+import org.valkyrienskies.core.api.ships.LoadedServerShip;
 import org.valkyrienskies.core.api.ships.ServerShip;
-import org.valkyrienskies.core.apigame.world.ServerShipWorldCore;
+import org.valkyrienskies.core.internal.world.VsiServerShipWorld;
 import org.valkyrienskies.mod.common.VSGameUtilsKt;
 
 import java.util.ArrayList;
@@ -102,9 +103,10 @@ public final class ShipCleaner {
 		}
 		int count = 0;
 		final ShipAllocator allocator = ShipAllocator.get(server);
-		final ServerShipWorldCore world = VSGameUtilsKt.getShipObjectWorld(server);
+		final VsiServerShipWorld world = VSGameUtilsKt.getShipObjectWorld(server);
 		final List<ICleanListener> generalListeners = getListeners();
 		for (final ServerShip ship : new ShipAllocator.SafeShipIterable<>(world.getAllShips())) {
+			final long shipId = ship.getId();
 			final ServerLevel level = LevelUtil.getLevel(ship.getChunkClaimDimension());
 			final ShipCleanAttachment cleanAttachment = ShipCleanAttachment.get(ship);
 			if (cleanAttachment.isProtected()) {
@@ -151,11 +153,11 @@ public final class ShipCleaner {
 			}
 			final boolean shouldClean = context.getCleanSuggestion();
 			if (shouldClean != marked) {
-				Constants.LOG.debug("[vsplit]: Ship {} marked = {}", ship.getId(), shouldClean);
+				Constants.LOG.debug("[vsplit]: Ship {} marked = {}", shipId, shouldClean);
 				cleanAttachment.setMarked(shouldClean);
 			}
-			if (shouldClean && (forceRemove || marked) && !ShipConnectivityApi.isConnectedToGround(ship.getId())) {
-				final Set<ServerShip> ships = ShipConnectivityApi.getAllConnectedShipsAndSelf(ship.getId());
+			if (shouldClean && (forceRemove || marked) && !ShipConnectivityApi.isConnectedToGround(ship)) {
+				final Set<LoadedServerShip> ships = ShipConnectivityApi.getAllConnectedShipsAndSelf(ship);
 				boolean clean = true;
 				if (ships.size() > 1) {
 					for (final ServerShip part : ships) {

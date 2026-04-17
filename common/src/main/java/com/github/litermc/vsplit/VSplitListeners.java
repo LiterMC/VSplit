@@ -16,7 +16,7 @@ import net.minecraft.tags.BlockTags;
 import net.minecraft.world.level.block.LeavesBlock;
 import net.minecraft.world.level.block.RotatedPillarBlock;
 import net.minecraft.world.level.block.state.BlockState;
-
+import org.valkyrienskies.core.api.ships.LoadedServerShip;
 import org.valkyrienskies.core.api.ships.ServerShip;
 import org.valkyrienskies.mod.common.VSGameUtilsKt;
 
@@ -73,7 +73,7 @@ public final class VSplitListeners {
 					if (ship != null) {
 						final int DEFAULT_FORCE_DECAY_TIMEOUT = 20 * 60 * 10; // 10 min
 						ship.setSlug(DecayAttachment.DECAY_PREFIX + "tree-" + ship.getId());
-						ship.saveAttachment(DecayAttachment.class, new DecayAttachment(DEFAULT_FORCE_DECAY_TIMEOUT));
+						((LoadedServerShip) ship).setAttachment(new DecayAttachment(DEFAULT_FORCE_DECAY_TIMEOUT));
 					}
 				}
 				return;

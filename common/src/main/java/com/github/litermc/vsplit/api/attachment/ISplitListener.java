@@ -3,7 +3,7 @@ package com.github.litermc.vsplit.api.attachment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 
-import org.valkyrienskies.core.api.ships.ServerShip;
+import org.valkyrienskies.core.api.ships.LoadedServerShip;
 
 import java.util.Set;
 import java.util.function.Consumer;
@@ -32,7 +32,7 @@ public interface ISplitListener {
 		 *
 		 * @return the splitting ship.
 		 */
-		ServerShip getShip();
+		LoadedServerShip getShip();
 
 		/**
 		 * Get the blocks that is going to split out.
@@ -47,6 +47,6 @@ public interface ISplitListener {
 		 *
 		 * @param callback The after split callback.
 		 */
-		void addAfterSplit(Consumer<ServerShip> callback);
+		void addAfterSplit(Consumer<LoadedServerShip> callback);
 	}
 }

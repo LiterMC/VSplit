@@ -1,47 +1,43 @@
 package com.github.litermc.vsplit.impl.attachment;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonGetter;
-import com.fasterxml.jackson.annotation.JsonSetter;
+import com.github.litermc.vtil.api.storage.IShipAdditionalData;
+import com.github.litermc.vtil.api.storage.ShipDataStorage;
+import net.minecraft.nbt.CompoundTag;
 import org.valkyrienskies.core.api.ships.ServerShip;
 
-@JsonAutoDetect(
-	fieldVisibility = JsonAutoDetect.Visibility.NONE,
-	isGetterVisibility = JsonAutoDetect.Visibility.NONE,
-	getterVisibility = JsonAutoDetect.Visibility.NONE,
-	setterVisibility = JsonAutoDetect.Visibility.NONE
-)
-public final class ShipCleanAttachment {
+public final class ShipCleanAttachment implements IShipAdditionalData {
 	private boolean protecting = false;
 	private boolean marked = false;
 
-	@JsonGetter("protected")
+	public static ShipCleanAttachment get(final ServerShip ship) {
+		return ShipDataStorage.get(ship).getOrCreate(ShipCleanAttachment.class);
+	}
+
 	public boolean isProtected() {
 		return this.protecting;
 	}
 
-	@JsonSetter("protected")
 	public void setProtected(final boolean protecting) {
 		this.protecting = protecting;
 	}
 
-	@JsonGetter("marked")
 	public boolean isMarked() {
 		return this.marked;
 	}
 
-	@JsonSetter("marked")
 	public void setMarked(final boolean marked) {
 		this.marked = marked;
 	}
 
-	public static ShipCleanAttachment get(final ServerShip ship) {
-		final ShipCleanAttachment attachment = ship.getAttachment(ShipCleanAttachment.class);
-		if (attachment != null) {
-			return attachment;
-		}
-		final ShipCleanAttachment newAttachment = new ShipCleanAttachment();
-		ship.saveAttachment(ShipCleanAttachment.class, newAttachment);
-		return newAttachment;
+	@Override
+	public void load(final CompoundTag data) {
+		data.putBoolean("protected", this.protecting);
+		data.putBoolean("marked", this.marked);
+	}
+
+	@Override
+	public void save(final CompoundTag data) {
+		this.protecting = data.getBoolean("protected");
+		this.marked = data.getBoolean("marked");
 	}
 }

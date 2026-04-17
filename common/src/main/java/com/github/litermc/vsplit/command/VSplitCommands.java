@@ -12,13 +12,9 @@ import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 
-import org.valkyrienskies.core.api.ships.LoadedServerShip;
 import org.valkyrienskies.core.api.ships.ServerShip;
 import org.valkyrienskies.core.api.ships.Ship;
-import org.valkyrienskies.core.apigame.world.ServerShipWorldCore;
-import org.valkyrienskies.mod.common.VSGameUtilsKt;
-import org.valkyrienskies.mod.common.command.ShipArgument;
-import org.valkyrienskies.mod.mixinducks.feature.command.VSCommandSource;
+import org.valkyrienskies.mod.common.command.arguments.ShipArgument;
 
 import java.util.Set;
 
@@ -37,7 +33,7 @@ public final class VSplitCommands {
 				.executes((ctx) -> VSplitCommands.clean(ctx, false))
 			)
 			.then(Commands.literal("protect")
-				.then(Commands.argument("ships", ShipArgument.Companion.ships())
+				.then(Commands.argument("ships", ShipArgument.ships())
 					.then(Commands.argument("shouldProtect", BoolArgumentType.bool())
 						.executes((ctx) -> VSplitCommands.protect(ctx, BoolArgumentType.getBool(ctx, "shouldProtect")))
 					)
@@ -57,8 +53,7 @@ public final class VSplitCommands {
 	private static int protect(final CommandContext<CommandSourceStack> context, final boolean shouldProtect) throws CommandSyntaxException {
 		final CommandSourceStack source = context.getSource();
 		final MinecraftServer server = source.getServer();
-		final ServerShipWorldCore world = VSGameUtilsKt.getShipObjectWorld(server);
-		final Set<Ship> ships = ShipArgument.Companion.getShips((CommandContext<VSCommandSource>) ((CommandContext<?>) (context)), "ships");
+		final Set<Ship> ships = ShipArgument.getShips(context, "ships");
 		int count = 0;
 		for (final Ship ship : ships) {
 			if (!(ship instanceof ServerShip serverShip)) {
